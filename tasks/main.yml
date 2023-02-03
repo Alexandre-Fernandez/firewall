@@ -1,0 +1,68 @@
+---
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Uninstall firewall frontends.
+  become: true
+  package:
+    name:
+      - ufw
+      - firewalld
+    state: absent
+
+- name: Reset default policy.
+  become: true
+  iptables:
+    chain: "{{ item }}"
+    policy: ACCEPT
+  with_items:
+    - INPUT
+    - OUTPUT
+    - FORWARD
+
+- name: Flush rules.
+  become: true
+  iptables:
+    flush: true
+
+- name: Allow related and established connections.
+  become: true
+  iptables:
+    chain: "{{ item }}"
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+  with_items:
+    - INPUT
+    - OUTPUT
+
+- include_tasks: ssh.yml
+  when: firewall_is_all_ssh_allowed
+
+- name: Block all trafic by default.
+  become: true
+  iptables:
+    chain: "{{ item }}"
+    policy: DROP
+  with_items:
+    - INPUT
+    - OUTPUT
+    - FORWARD
+
+- name: Allow incoming connections.
+  become: true
+  iptables:
+    chain: INPUT
+    source: "{{ item.source | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    destination_port: "{{ item.port | default(omit) }}"
+    jump: ACCEPT
+  with_items: "{{ firewall_allowed_input }}"
+
+- name: Allow outgoing connections.
+  become: true
+  iptables:
+    chain: OUTPUT
+    source: "{{ item.source | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    destination_port: "{{ item.port | default(omit) }}"
+    jump: ACCEPT
+  with_items: "{{ firewall_allowed_output }}"

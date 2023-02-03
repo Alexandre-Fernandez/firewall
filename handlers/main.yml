@@ -1,0 +1,14 @@
+---
+- name: restart firewalld
+  become: true
+  service:
+    name: firewalld
+    state: restarted
+    enabled: true
+
+- name: restart ufw
+  become: true
+  service:
+    name: firewalld
+    state: restarted
+    enabled: true
