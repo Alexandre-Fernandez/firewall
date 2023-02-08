@@ -1,13 +1,13 @@
 ---
-- name: Restart sshd.
-  become: true
+- become: true
   service:
     name: "{{ firewall_sshd.name }}"
     state: restarted
     enabled: true
   changed_when: false
 
-- shell: 'lsof -i tcp -Pn 2>&1 | awk ''/sshd/ && /LISTEN/ { gsub(/.*:/,"",$(NF-1)) ; print $(NF-1) }'' | sort -u'
+- name: Auto-detect ssh port.
+  shell: 'lsof -i tcp -Pn 2>&1 | awk ''/sshd/ && /LISTEN/ { gsub(/.*:/,"",$(NF-1)) ; print $(NF-1) }'' | sort -u'
   become: true
   register: sshd_port
   when: firewall_ssh_port == -1

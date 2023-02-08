@@ -2,6 +2,9 @@ firewall_allowed_input: []
 
 firewall_allowed_output: []
 
+firewall_is_dns_allowed: true
+
 firewall_is_all_ssh_allowed: true
 
-firewall_ssh_port: -1 # used instead of auto-detect when firewall_is_all_ssh_allowed
+firewall_ssh_port: -1 # used when firewall_is_all_ssh_allowed is false (instead of auto-detect)
+
