@@ -2,6 +2,8 @@ firewall_allowed_input: []
 
 firewall_allowed_output: []
 
+firewall_is_loopback_allowed: true
+
 firewall_is_dns_allowed: true
 
 firewall_is_all_ssh_allowed: true

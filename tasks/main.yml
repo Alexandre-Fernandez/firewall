@@ -24,6 +24,13 @@
   iptables:
     flush: true
 
+- name: Drop invalid packets.
+  become: true
+  iptables:
+    chain: INPUT
+    ctstate: INVALID
+    jump: DROP
+
 - name: Allow related and established connections.
   become: true
   iptables:
@@ -34,8 +41,21 @@
     - INPUT
     - OUTPUT
 
-- include_tasks: ssh.yml
-  when: firewall_is_all_ssh_allowed
+- name: Allow incoming loopback trafic.
+  become: true
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+  when: firewall_is_loopback_allowed
+
+- name: Allow outgoing loopback trafic.
+  become: true
+  iptables:
+    chain: OUTPUT
+    out_interface: lo
+    jump: ACCEPT
+  when: firewall_is_loopback_allowed
 
 - name: Allow DNS trafic.
   become: true
@@ -50,6 +70,9 @@
     - chain: OUTPUT
       protocol: udp
   when: firewall_is_dns_allowed
+
+- include_tasks: ssh.yml
+  when: firewall_is_all_ssh_allowed
 
 - name: Block all trafic by default.
   become: true
